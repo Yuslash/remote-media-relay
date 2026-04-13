@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
+    "target": "es2023",
+    "lib": ["ES2023"],
+    "module": "esnext",
+    "types": ["node", "electron"],
+    "skipLibCheck": true,
+
+    /* Node/Electron mode */
+    "moduleResolution": "bundler",
+    "verbatimModuleSyntax": false,
+    "moduleDetection": "force",
+    "esModuleInterop": true,
+    "noEmit": true,
+
+    /* Linting - relaxed for electron main/preload */
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["vite.config.ts", "electron/**/*.ts"]
+}
+
+

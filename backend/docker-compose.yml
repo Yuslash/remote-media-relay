@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  api:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    command: sh -c "uvicorn api.main:app --host 0.0.0.0 --port $${BACKEND_PORT:-8000} --reload"
+    ports:
+      - "${BACKEND_PORT:-8000}:${BACKEND_PORT:-8000}"
+    volumes:
+      - .:/app
+      - shared_storage:/app/storage
+      - logs_data:/app/logs
+    env_file:
+      - .env
+    depends_on:
+      - redis
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: celery -A worker.main.celery_app worker -l info
+    volumes:
+      - .:/app
+      - shared_storage:/app/storage
+      - logs_data:/app/logs
+    env_file:
+      - .env
+    depends_on:
+      - redis
+
+volumes:
+  redis_data:
+  shared_storage:
+  logs_data:
