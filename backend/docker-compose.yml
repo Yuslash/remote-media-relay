@@ -1,44 +1,52 @@
 version: '3.8'
 
+name: rmr-backend
+
 services:
   redis:
     image: redis:7-alpine
+    container_name: rmr-redis
     ports:
-      - "6379:6379"
+      - "6399:6379"
     volumes:
-      - redis_data:/data
+      - rmr_redis_data:/data
+    restart: unless-stopped
 
   api:
-    build: 
+    build:
       context: .
       dockerfile: Dockerfile
-    command: sh -c "uvicorn api.main:app --host 0.0.0.0 --port $${BACKEND_PORT:-8000} --reload"
+    container_name: rmr-api
+    command: sh -c "uvicorn api.main:app --host 0.0.0.0 --port $${BACKEND_PORT:-8765} --reload"
     ports:
-      - "${BACKEND_PORT:-8000}:${BACKEND_PORT:-8000}"
+      - "${BACKEND_PORT:-8765}:${BACKEND_PORT:-8765}"
     volumes:
       - .:/app
-      - shared_storage:/app/storage
-      - logs_data:/app/logs
+      - rmr_shared_storage:/app/storage
+      - rmr_logs_data:/app/logs
     env_file:
       - .env
     depends_on:
       - redis
+    restart: unless-stopped
 
   worker:
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: rmr-worker
     command: celery -A worker.main.celery_app worker -l info
     volumes:
       - .:/app
-      - shared_storage:/app/storage
-      - logs_data:/app/logs
+      - rmr_shared_storage:/app/storage
+      - rmr_logs_data:/app/logs
     env_file:
       - .env
     depends_on:
       - redis
+    restart: unless-stopped
 
 volumes:
-  redis_data:
-  shared_storage:
-  logs_data:
+  rmr_redis_data:
+  rmr_shared_storage:
+  rmr_logs_data:
